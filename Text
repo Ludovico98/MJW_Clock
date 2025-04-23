@@ -1,0 +1,33 @@
+pi@raspberrypi:~ $ lsusb
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 005: ID 346d:5678  
+Bus 001 Device 004: ID 145f:02c9 Trust 
+Bus 001 Device 003: ID 046d:c534 Logitech, Inc. Unifying Receiver
+Bus 001 Device 002: ID 2109:3431 VIA Labs, Inc. Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+
+
+pi@raspberrypi:~ $ sudo lshw -short
+H/W path                Device     Class      Description
+=========================================================
+                                   system     Raspberry Pi 4 Model B Rev 1.
+/0                                 bus        Motherboard
+/0/1                               processor  cpu
+/0/2                               processor  cpu
+/0/3                               processor  cpu
+/0/4                               processor  cpu
+/0/5                               memory     3827MiB System memory
+/0/0                               bridge     Broadcom Limited
+/0/0/0                             bus        VL805 USB 3.0 Host Controller
+/0/0/0/0                usb1       bus        xHCI Host Controller
+/0/0/0/0/1                         bus        USB2.0 Hub
+/0/0/0/0/1/1                       input      USB Receiver
+/0/0/0/0/1/2                       input      Trust Keyboard
+/0/0/0/0/1/3            scsi0      storage    Disk 20
+/0/0/0/0/1/3/0.0.0      /dev/sda   disk       125GB ProductCode
+/0/0/0/0/1/3/0.0.0/0    /dev/sda   disk       125GB 
+/0/0/0/0/1/3/0.0.0/0/1  /dev/sda1  volume     117GiB HPFS/NTFS partition
+/0/0/0/1                usb2       bus        xHCI Host Controller
+/1                      eth0       network    Ethernet interface
+/2                      wlan0      network    Wireless interface
