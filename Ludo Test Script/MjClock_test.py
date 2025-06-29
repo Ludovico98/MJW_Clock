@@ -29,7 +29,6 @@ GPIO.output(dirHr, GPIO.HIGH)
 GPIO.output(enaMin, GPIO.LOW)
 GPIO.output(enaHr, GPIO.LOW)
 
-delayMotorFast = 0.001 #fast setting used for set up
 setpPerHr = 1200 #steps per hour
 setpPerMin = 720 #steps per minute
 
@@ -219,8 +218,8 @@ def main():
         input("\nClock is set to 12:00. Press Enter to continue...")
         SetClockToCurrentTime()
         print("Clock setup complete.")
-        cloclk_thread = threading.Thread(target=run_clock)
-        cloclk_thread.start()
+        clock_thread = threading.Thread(target=run_clock)
+        clock_thread.start()
 
         while True:
             sleep(1)

@@ -53,7 +53,7 @@ def startupMin():
         minuteFast()
 
 def startupHr():
-    GPIO.output(enaMin, GPIO.LOW)
+    GPIO.output(enaHr, GPIO.LOW)
     while GPIO.input(switchHr) == GPIO.HIGH:
         hourFast()
 
@@ -127,7 +127,7 @@ def minCompare():
     if minCount < minuteStamp:
         delayMotor = delayMotor - deltaMin
         print("speed up")
-    elif minCount > minuteStamp & secondStamp > 30 :
+    elif minCount > minuteStamp and secondStamp > 30 :
         delayMotor = delayMotor + deltaMin
         print("speed down")
         
@@ -141,7 +141,7 @@ def hrCompare():
     if hrCount + startHour < hourStamp:
         minRatio -= 1
         print("ratio down")
-    elif hrCount + startHour > hourStamp & minuteStamp > 5 :
+    elif hrCount + startHour > hourStamp and minuteStamp > 5 :
         minRatio += 1
         print("ratio up")
 
@@ -186,7 +186,7 @@ def main():
             minuteStamp = int(time.strftime('%M'))
 
             if startHour<=hourStamp<endHour:  #Running Mode
-                if not hourStamp == endHour - 1 & minuteStamp > endMinute :
+                if not hourStamp == endHour - 1 and minuteStamp > endMinute :
                     running = True
                     GPIO.output(enaMin, GPIO.LOW) #Enable min motor
                     GPIO.output(enaHr, GPIO.LOW) #Enable hr motor
