@@ -29,13 +29,13 @@ GPIO.output(dirHr, GPIO.HIGH)
 GPIO.output(enaMin, GPIO.LOW)
 GPIO.output(enaHr, GPIO.LOW)
 
-setpPerHr = 1200 #steps per hour
-setpPerMin = 720 #steps per minute
+stepsPerHr = 1200 #steps per hour
+stepsPerMin = 720 #steps per minute
 
 ###############################################################################################################
 delayMotor = 0.035370 #0.151 * 1.02 = 1/[(0.396rpm * 1000ppr) / 60] change this for speed of both motors
 delayMotorFast = 0.001 #fast setting used for set up
-deltaMin = delayMotor * 0.00 #2% change every time theres a difference in the time
+deltaMin = delayMotor * 0.02 #2% change every time theres a difference in the time
 hrBounce = 200000 #200000 = delay time to stop switch activating
 minBounce = 36000 #12000 = delay time to stop switch activating
 minRatio = 1238 # 12 hours including 0, change this to configure the ratio between disc
@@ -56,27 +56,42 @@ def hourFast():
     sleep(delayMotorFast)
 
 def minSearch():
+    """Find minute hand home position with proper logic"""
+    print("Finding minute hand home position...")
+    
+    # If switch is already activated, move until it's not
     if GPIO.input(switchMin) == GPIO.HIGH:
-        while GPIO.input(switchMin) == GPIO.HIGH:
-            minuteFast() #moving the minute hand to the home position
-    else:
-        for _ in range(50):
-            minuteFast()
+        print("- Switch already activated, moving until deactivated")
         while GPIO.input(switchMin) == GPIO.HIGH:
             minuteFast()
-        print("Minute hand found home position")
+    
+    # Now move until switch is activated again
+    print("- Moving until switch activates")
+    while GPIO.input(switchMin) == GPIO.LOW:
+        minuteFast()
+    
+    # Add small delay to account for bounce
+    sleep(minBounce / 1000000.0)
+    print("✓ Minute hand home position found!")
 
 def hrSearch():
+    """Find hour hand home position with proper logic"""
+    print("Finding hour hand home position...")
+    
+    # If switch is already activated, move until it's not
     if GPIO.input(switchHr) == GPIO.HIGH:
+        print("- Switch already activated, moving until deactivated")
         while GPIO.input(switchHr) == GPIO.HIGH:
             hourFast()
-        print("Hour hand found home position")
-    else:
-        for _ in range(50):
-            hourFast()
-        while GPIO.input(switchHr) == GPIO.HIGH:
-            hourFast()
-        print("Hour hand found home position")
+    
+    # Now move until switch is activated again
+    print("- Moving until switch activates")
+    while GPIO.input(switchHr) == GPIO.LOW:
+        hourFast()
+    
+    # Add small delay to account for bounce
+    sleep(hrBounce / 1000000.0)
+    print("✓ Hour hand home position found!")
 
 def SetClockTo1200():
     minSearch()
@@ -84,6 +99,7 @@ def SetClockTo1200():
     print("Clock set to start time 12:00")
 
 def SetClockToCurrentTime():
+    """Set clock hands to current computer time"""
     current_time = time.localtime()
     current_hour = current_time.tm_hour % 12
     if current_hour == 0:
@@ -91,88 +107,92 @@ def SetClockToCurrentTime():
     current_minute = current_time.tm_min
     print(f"Setting clock to current time: {current_hour}:{current_minute:02d}")
 
+    # Move to home positions first
     minSearch()
     hrSearch()
 
-    minute_steps = current_minute * 12
-    print(f"Moving minute hand to {current_minute} ({minute_steps} steps)")
-    for _ in range(current_minute):
+    # Move minute hand to current minute
+    print(f"Moving minute hand to {current_minute} minutes")
+    for _ in range(current_minute * 12):  # Assuming 12 steps per minute
         minuteFast()
 
-    hour_steps = (current_hour * 100) + (current_minute * 100 // 60)
+    # Move hour hand to current hour position
+    hour_steps = (current_hour * hrRatio) + (current_minute * hrRatio // 60)
     print(f"Moving hour hand to position {current_hour} ({hour_steps} steps)")
     for _ in range(hour_steps):
         hourFast()
-    hourFast()
+    
     print("Clock set to current time")
 
 def advance_minute():
-    for x in range(12):
-        minuteFast()
+    """Advance minute hand by one minute using proper step calculation"""
+    steps_per_minute = minRatio // 60  # Calculate steps needed per minute
+    for _ in range(steps_per_minute):
+        minute_step()
 
 def advance_hour_fraction():
-    for x in range(100 // 60):
-        hourFast()
+    """Advance hour hand by a fractional amount for smooth movement"""
+    steps_per_minute_fraction = hrRatio // 60  # Steps per minute for hour hand
+    for _ in range(steps_per_minute_fraction):
+        hour_step()
+    
+    # Add occasional extra step to account for rounding
+    if time.time() % 3 < 1:  # Improved randomization
+        hour_step()
 
-    if time.time() % 3 < 2:
-        hourFast()
- 
 def verify_clock_position():
+    """Verify and correct clock position if needed"""
     print("Verifying clock position...")
 
-    #store time
+    # Get current time
     current_time = time.localtime()
     current_hour = current_time.tm_hour % 12
     if current_hour == 0:
         current_hour = 12
     current_minute = current_time.tm_min
 
+    print(f"Target time: {current_hour}:{current_minute:02d}")
+
+    # Move to home positions
     minSearch()
     hrSearch()
 
+    # Reposition minute hand
     minute_steps = current_minute * 12
-    print(f"Reposition minute hand to: {current_minute} minutes ({minute_steps} steps)")
+    print(f"Repositioning minute hand to: {current_minute} minutes ({minute_steps} steps)")
     for _ in range(minute_steps):
         minuteFast()
 
-    hour_steps = (current_hour * 100) + (current_minute * 100 // 60)
-    print(f"Reposition hour hand to: {current_hour} hours ({hour_steps} steps)")
+    # Reposition hour hand
+    hour_steps = (current_hour * hrRatio) + (current_minute * hrRatio // 60)
+    print(f"Repositioning hour hand to: {current_hour} hours ({hour_steps} steps)")
     for _ in range(hour_steps):
         hourFast()
     
-    print("Clock position verified")
+    print("Clock position verified and corrected")
 
 
 
-###### added code #######
+###### Motor Control Functions #######
 def minute_step():
+    """Single step for minute hand at normal speed"""
     GPIO.output(stepMin, GPIO.HIGH)
     sleep(delayMotor)
     GPIO.output(stepMin, GPIO.LOW)
     sleep(delayMotor)
 
 def hour_step():
+    """Single step for hour hand at normal speed"""
     GPIO.output(stepHr, GPIO.HIGH)
     sleep(delayMotor)
     GPIO.output(stepHr, GPIO.LOW)
     sleep(delayMotor)
-
-def advance_minute():
-    for _ in range(minRatio // 100):  # Using minRatio to determine steps per minute
-        minuteFast()
-
-def advance_hour_fraction():
-    for _ in range(hrRatio // 60):  # Using hrRatio for hour movement
-        hourFast()
-    
-    # Add occasional extra step to account for rounding
-    if time.time() % 3 < 2:
-        hourFast()
-###### added code #######
+###### End Motor Control Functions #######
 
     
 def run_clock():
-    #keep clock running
+    """Main clock running loop with proper time tracking"""
+    print("Starting continuous clock operation...")
     last_minute = int(time.strftime("%M"))
     last_hour = int(time.strftime("%H"))
 
@@ -181,57 +201,54 @@ def run_clock():
         current_minute = current_time.tm_min
         current_hour = current_time.tm_hour
 
-        if current_time != last_minute and current_hour != last_hour:
+        # Check if minute has changed
+        if current_minute != last_minute:
+            print(f"Minute changed: {last_minute} -> {current_minute}")
             advance_minute()
             advance_hour_fraction()
             last_minute = current_minute
         
+        # Check if hour has changed - verify position every hour
         if current_hour != last_hour:
+            print(f"Hour changed: {last_hour} -> {current_hour}")
             verify_clock_position()
             last_hour = current_hour
         
-        sleep(1)  # Sleep for a second to avoid busy waiting
-
-def minSearch():
-    # Use bouncetime concept from the variables
-    if GPIO.input(switchMin) == GPIO.HIGH:
-        print("Finding minute hand home position...")
-        while GPIO.input(switchMin) == GPIO.HIGH:
-            minuteFast()
-        # Add small delay to account for bounce
-        sleep(minBounce / 1000000.0)
-        print("Minute hand found home position")
-
-def hrSearch():
-    if GPIO.input(switchHr) == GPIO.HIGH:
-        print("Finding hour hand home position...")
-        while GPIO.input(switchHr) == GPIO.HIGH:
-            hourFast()
-        # Add small delay to account for bounce
-        sleep(hrBounce / 1000000.0)
-        print("Hour hand found home position")
+        sleep(1)  # Check every second
 
 def main():
+    """Main function to control clock setup and operation"""
     try:
+        print("=== MJW Clock Test System ===")
         print("Starting clock setup...")
+        
+        # Initial setup - move to 12:00 position
         SetClockTo1200()
         input("\nClock is set to 12:00. Press Enter to continue...")
+        
+        # Set to current time
         SetClockToCurrentTime()
         print("Clock setup complete.")
-        clock_thread = threading.Thread(target=run_clock)
+        
+        # Start continuous operation in separate thread
+        print("Starting continuous clock operation...")
+        clock_thread = threading.Thread(target=run_clock, daemon=True)
         clock_thread.start()
 
+        # Keep main thread alive
+        print("Clock is running. Press Ctrl+C to stop.")
         while True:
             sleep(1)
     
     except KeyboardInterrupt:
-        print("\n\nPROCESS INTERRUPTED!!!! Cleaning up...")
+        print("\n\nPROCESS INTERRUPTED! Cleaning up...")
 
     finally:
-        GPIO.output(enaMin, GPIO.HIGH)
-        GPIO.output(enaHr, GPIO.HIGH)
+        print("Disabling motors and cleaning up GPIO...")
+        GPIO.output(enaMin, GPIO.HIGH)  # Disable minute motor
+        GPIO.output(enaHr, GPIO.HIGH)   # Disable hour motor
         GPIO.cleanup()
-        print("GPIO cleaned up")
+        print("GPIO cleaned up successfully")
     
 if __name__ == "__main__":
     main()
