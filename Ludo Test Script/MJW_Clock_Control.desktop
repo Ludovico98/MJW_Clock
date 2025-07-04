@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MJW Clock Control
+Comment=Control interface for MJW mechanical clock
+Exec=/home/pi/MJW_Clock/Ludo Test Script/launch_clock_ui.sh
+Icon=/home/pi/MJW_Clock/Ludo Test Script/clock_icon.png
+Terminal=false
+Categories=Utility;Engineering;
+StartupNotify=true
+Path=/home/pi/MJW_Clock/Ludo Test Script/

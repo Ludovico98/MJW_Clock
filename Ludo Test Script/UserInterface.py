@@ -13,7 +13,7 @@ def run_clock():
     """Run the main clock9.py script"""
     try:
         script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Functioning scripts", "clock9.py")
-        python_exe = "C:/Users/lbitt/AppData/Local/Microsoft/WindowsApps/python3.11.exe"
+        python_exe = "python3"  # Use system python3 on Raspberry Pi
         print(f"Running clock script: {script_path}")
         subprocess.Popen([python_exe, script_path])
         print("Clock script started successfully")
@@ -24,7 +24,7 @@ def skip_hour():
     """Run the skiphour.py script"""
     try:
         script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Functioning scripts", "skiphour.py")
-        python_exe = "C:/Users/lbitt/AppData/Local/Microsoft/WindowsApps/python3.11.exe"
+        python_exe = "python3"  # Use system python3 on Raspberry Pi
         print(f"Running skip hour script: {script_path}")
         subprocess.run([python_exe, script_path])
         print("Skip hour completed")
@@ -35,7 +35,7 @@ def skip_minute():
     """Run the skipmin.py script"""
     try:
         script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Functioning scripts", "skipmin.py")
-        python_exe = "C:/Users/lbitt/AppData/Local/Microsoft/WindowsApps/python3.11.exe"
+        python_exe = "python3"  # Use system python3 on Raspberry Pi
         print(f"Running skip minute script: {script_path}")
         subprocess.run([python_exe, script_path])
         print("Skip minute completed")
