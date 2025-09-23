@@ -2,6 +2,60 @@
 
 ## Quick Setup (Recommended)
 
+Install
+
+Step 1: Install tkinter on Raspberry Pi
+```
+sudo apt update
+sudo apt install python3-tk
+```
+Step 2: Transfer files and navigate to the project
+
+```
+# If files are already on the Pi at /home/pi/MJW_Clock/
+cd "/home/pi/MJW_Clock/Ludo Test Script"
+```
+
+Step 3: Install CustomTkinter
+```
+pip3 install customtkinter
+```
+
+Step 4: Run the automatic setup script
+
+```
+python3 create_shortcut.py
+```
+
+Step 5: Test the GUI directly
+
+```
+python3 UserInterface.py
+```
+
+If you want to manually create the desktop shortcut:
+```
+# Make launch script executable
+chmod +x "/home/pi/MJW_Clock/Ludo Test Script/launch_clock_ui.sh"
+
+# Copy desktop file to desktop
+cp "/home/pi/MJW_Clock/Ludo Test Script/MJW_Clock_Control.desktop" ~/Desktop/
+
+# Make desktop entry executable
+chmod +x ~/Desktop/MJW_Clock_Control.desktop
+```
+
+
+For GPIO functionality (if your clock uses GPIO pins):
+
+```
+sudo apt install python3-rpi.gpio
+# or
+pip3 install RPi.GPIO
+```
+
+The key difference for Raspberry Pi is that `python3-tk` should be available in the repositories, and you'll have GPIO access for the actual clock hardware control.
+
 1. **Transfer files to your Raspberry Pi** in the folder `/home/pi/MJW_Clock/`
 
 2. **Run the setup script:**
